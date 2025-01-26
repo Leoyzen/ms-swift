@@ -5,7 +5,7 @@ import os
 import time
 import uuid
 from copy import deepcopy
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import InitVar, asdict, dataclass, field, fields
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from PIL import Image
@@ -31,6 +31,21 @@ class Model:
 class ModelList:
     data: List[Model]
     object: str = 'list'
+
+
+@dataclass
+class ResponseFormat:
+    # type must be 'json_schema', 'json_object', 'regex_schema' or 'text'
+    type: Literal['text', 'json_object', 'json_schema', 'regex_schema']
+    json_schema: Optional[Dict] = None
+    regex_schema: Optional[str] = None
+    schema: InitVar[Optional[Dict]] = None
+
+    def __post_init__(self, schema):
+        if schema is not None and self.json_schema is None:
+            self.json_schema = schema
+        if self.json_schema is not None:
+            self.type = 'json_schema'
 
 
 @dataclass
@@ -61,6 +76,8 @@ class RequestConfig:
     presence_penalty: float = 0.
     frequency_penalty: float = 0.
     length_penalty: float = 1.
+    response_format: Optional[ResponseFormat] = None
+    guided_decoding_backend: Optional[str] = None
 
     def __post_init__(self):
         if self.stop is None:
