@@ -70,7 +70,7 @@ Final Answer: 对输入问题的最终答案
 
 开始！
 """
-    tool_descs = [json.dumps(t, ensure_ascii=False) if not isinstance(t, str) else t for t in tool_descs]
+    tool_descs = [json.dumps(t, ensure_ascii=False, ensure_ascii=False) if not isinstance(t, str) else t for t in tool_descs]
     return REACT_ZH_PROMPT.format(tool_list='\n\n'.join(tool_descs), tool_names=','.join(tool_names))
 
 
@@ -80,7 +80,7 @@ def format_glm4(tool_names, tool_descs):
 # 可用工具
 
 {tool_list}"""
-    tool_descs = [json.dumps(t, ensure_ascii=False) if not isinstance(t, str) else t for t in tool_descs]
+    tool_descs = [json.dumps(t, ensure_ascii=False, ensure_ascii=False) if not isinstance(t, str) else t for t in tool_descs]
     tool_list = ''
     for name, tool in zip(tool_names, tool_descs):
         tool_list += f'## {name}\n\n{tool}\n\n'
