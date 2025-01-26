@@ -139,6 +139,8 @@ class StdTemplateInputs:
         if messages and messages[0]['role'] == 'system':
             message = messages.pop(0)
             system = message['content']
+            if isinstance(system, list):
+                system = "\n".join(c.get('text', '') for c in system if c.get('type') == 'text')
         else:
             system = None
 
