@@ -24,6 +24,7 @@ try:
     os.environ['VLLM_ENGINE_ITERATION_TIMEOUT_S'] = '3600'
     import vllm
     from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
+    from vllm.sampling_params import GuidedDecodingParams
 except Exception:
     raise
 
@@ -245,6 +246,22 @@ class VllmEngine(InferEngine):
                 kwargs[key] = getattr(self.generation_config, key)
             else:
                 kwargs[key] = new_value
+
+        if request_config.response_format is not None:
+            response_format = request_config.response_format
+            guided_decoding = {}
+            if response_format['type'] == 'json_object':
+                guided_decoding['json_object'] = True
+            elif response_format['type'] == 'json_schema':
+                json_schema = response_format.get('json_schema')
+                assert json_schema is not None
+                guided_decoding['json'] = json_schema
+            elif response_format['type'] == 'regex_schema':
+                regex_schema = response_format.get('regex_schema')
+                assert regex_schema is not None
+                guided_decoding['regex'] = regex_schema
+            guided_decoding['backend'] = request_config.guided_decoding_backend
+            kwargs['guided_decoding'] = GuidedDecodingParams(**guided_decoding)
 
         if request_config.logprobs:
             kwargs['logprobs'] = 1

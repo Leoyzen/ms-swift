@@ -5,6 +5,7 @@ import os
 import time
 from contextlib import contextmanager
 from copy import deepcopy
+from dataclasses import asdict
 from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Union
 
 import torch
@@ -180,6 +181,15 @@ class LmdeployEngine(InferEngine):
             kwargs['logprobs'] = 1
             if request_config.top_logprobs is not None:
                 kwargs['logprobs'] = max(1, request_config.top_logprobs)
+
+        if request_config.response_format is not None:
+            response_format = kwargs.setdefault('response_format', {})
+            print(f'{request_config.response_format=}')
+            response_format['type'] = request_config.response_format['type']
+            if response_format['type'] == 'regex_schema':
+                response_format['regex_schema'] = request_config.response_format['regex_schema']
+            elif response_format['type'] == 'json_schema':
+                response_format['json_schema'] = request_config.response_format['json_schema']
 
         res = LmdeployGenerationConfig(**kwargs)
         res.top_logprobs = request_config.top_logprobs
