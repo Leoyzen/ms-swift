@@ -180,11 +180,14 @@ class InferEngine(BaseInferEngine, ProcessorMixin):
         if not isinstance(response, str):
             response = '\n'.join([resp['text'] for resp in response if resp['type'] == 'text'])
 
-        action, action_input = split_action_action_input(response, tools_prompt=tools_prompt)
-        if action is None:
+        result = [
+            ChatCompletionMessageToolCall(function=Function(name=action, arguments=action_input))
+            for action, action_input in split_action_action_input(response, tools_prompt=tools_prompt)
+        ]
+        if len(result) == 0:
             return None
-
-        return [ChatCompletionMessageToolCall(function=Function(name=action, arguments=action_input))]
+        else:
+            return result
 
     @staticmethod
     def _get_num_tokens(inputs: Dict[str, Any]) -> int:
